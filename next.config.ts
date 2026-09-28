@@ -10,17 +10,23 @@ const nextConfig: NextConfig = {
   },
   // Next.js Image Optimization Pipeline: automatic AVIF/WebP conversion, responsive sizes, and edge caching.
   images: {
-    unoptimized: true,
+    unoptimized: process.env.NEXT_EXPORT === '1',
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 86400,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2560],
+    imageSizes: [64, 128, 256, 384, 512],
+    minimumCacheTTL: 31536000, // 1 year edge cache for immutable photography assets
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'picsum.photos',
         port: '',
-        pathname: '/**', // This allows any path under the hostname
+        pathname: '/**',
       },
       {
         protocol: 'https',

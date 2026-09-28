@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, MapPin, Calendar, Camera, Maximize2, X, ChevronLeft, ChevronRight, Share2, Check } from 'lucide-react';
 import { StoryProject, StoryPhoto } from '@/lib/stories-data';
 import { optimizeImageUrl, DARK_BLUR_DATA_URL } from '@/lib/image-utils';
+import { PortfolioImage } from '@/components/ui/PortfolioImage';
 
 interface StoryDetailViewProps {
   project: StoryProject;
@@ -132,15 +133,12 @@ export const StoryDetailView: React.FC<StoryDetailViewProps> = ({
           layoutId={`card-${project.id}`}
           className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-[28px] sm:rounded-[36px] overflow-hidden bg-[#18191b] shadow-2xl border border-[#caccca] mb-12 sm:mb-16 group"
         >
-          <Image
-            src={optimizeImageUrl(project.coverImage, 1800, 90)}
+          <PortfolioImage
+            src={project.coverImage}
             alt={project.title}
-            fill
+            context="hero"
             priority
-            placeholder="blur"
-            blurDataURL={DARK_BLUR_DATA_URL}
-            sizes="(max-width: 1200px) 100vw, 1200px"
-            className="object-cover object-center filter contrast-[1.05]"
+            className="filter contrast-[1.05]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none" />
 
@@ -233,16 +231,14 @@ export const StoryDetailView: React.FC<StoryDetailViewProps> = ({
                 className="group cursor-pointer space-y-3"
               >
                 <div className="relative aspect-[4/5] sm:aspect-[3/4] w-full rounded-[20px] overflow-hidden bg-[#18191b] border border-[#caccca] shadow-md transition-all duration-500 group-hover:shadow-2xl">
-                  <Image
-                    src={optimizeImageUrl(photo.url, 1200, 85)}
+                  <PortfolioImage
+                    src={photo.url}
                     alt={photo.caption}
-                    fill
-                    placeholder="blur"
-                    blurDataURL={DARK_BLUR_DATA_URL}
+                    context="grid"
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover object-center filter contrast-[1.03] transition-transform duration-700 group-hover:scale-104"
+                    className="filter contrast-[1.03] transition-transform duration-700 group-hover:scale-104"
                   />
-                  <div className="absolute inset-0 bg-black/15 group-hover:bg-transparent transition-colors" />
+                  <div className="absolute inset-0 bg-black/15 group-hover:bg-transparent transition-colors pointer-events-none" />
 
                   {/* Expand badge */}
                   <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white backdrop-blur-md border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -371,12 +367,11 @@ export const StoryDetailView: React.FC<StoryDetailViewProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative max-w-5xl max-h-[75vh] w-full h-full flex items-center justify-center">
-                <Image
-                  src={optimizeImageUrl(project.photos[selectedPhotoIndex].url, 2000, 90)}
+                <PortfolioImage
+                  src={project.photos[selectedPhotoIndex].url}
                   alt={project.photos[selectedPhotoIndex].caption}
-                  fill
+                  context="lightbox"
                   className="object-contain"
-                  sizes="100vw"
                   priority
                 />
               </div>

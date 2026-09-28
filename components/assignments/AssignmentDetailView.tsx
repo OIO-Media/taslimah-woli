@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { AssignmentProject, AssignmentPhoto } from '@/lib/assignments-data';
 import { optimizeImageUrl, DARK_BLUR_DATA_URL } from '@/lib/image-utils';
+import { PortfolioImage } from '@/components/ui/PortfolioImage';
 
 interface AssignmentDetailViewProps {
   project: AssignmentProject;
@@ -151,15 +152,12 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
           layoutId={`assignment-card-${project.id}`}
           className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-[28px] sm:rounded-[36px] overflow-hidden bg-[#18191b] shadow-2xl border border-[#caccca] mb-12 sm:mb-16 group"
         >
-          <Image
-            src={optimizeImageUrl(project.coverImage, 1800, 90)}
+          <PortfolioImage
+            src={project.coverImage}
             alt={project.title}
-            fill
+            context="hero"
             priority
-            placeholder="blur"
-            blurDataURL={DARK_BLUR_DATA_URL}
-            sizes="(max-width: 1200px) 100vw, 1200px"
-            className="object-cover object-center filter contrast-[1.05]"
+            className="filter contrast-[1.05]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
 
@@ -281,15 +279,12 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
                       isLandscape ? 'aspect-[16/10]' : 'aspect-[4/5]'
                     }`}
                   >
-                    <Image
-                      src={optimizeImageUrl(photo.url, 1200, 85)}
+                    <PortfolioImage
+                      src={photo.url}
                       alt={photo.caption}
-                      fill
-                      loading="lazy"
-                      placeholder="blur"
-                      blurDataURL={DARK_BLUR_DATA_URL}
+                      context="grid"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
-                      className="object-cover object-center group-hover:scale-103 transition-transform duration-700 ease-out"
+                      className="group-hover:scale-103 transition-transform duration-700 ease-out"
                     />
 
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
@@ -399,10 +394,10 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
             {/* Main Center Image */}
             <div className="relative flex-1 w-full max-h-[78vh] my-auto flex items-center justify-center">
               <div className="relative w-full h-full max-w-5xl">
-                <Image
-                  src={optimizeImageUrl(project.photos[selectedPhotoIndex].url, 2000, 95)}
+                <PortfolioImage
+                  src={project.photos[selectedPhotoIndex].url}
                   alt={project.photos[selectedPhotoIndex].caption}
-                  fill
+                  context="lightbox"
                   priority
                   className="object-contain"
                 />
