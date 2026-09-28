@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600;1,700&family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Google+Sans+Text:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/googlesans/v70/4Ua_rENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RFD48TE63OOYKtrwEIKli.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/googlesans/v70/4Ua_rENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RFD48TE63OOYKtrw2IKli.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/googlesans/v70/4Ua_rENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iqcsih3SAyH6cAwhX9RFD48TE63OOYKtrzjJ6li.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/googlesanstext/v29/5aUu9-KzpRiLCAt4Unrc-xIKmCU5mE0.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans Text';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/googlesanstext/v29/5aUp9-KzpRiLCAt4Unrc-xIKmCU5oLlVrm8.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans Text';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/googlesanstext/v29/5aUp9-KzpRiLCAt4Unrc-xIKmCU5oPFTrm8.ttf') format('truetype');
+}
+
+:root {
+  /* 5-Color Architectural Palette from User Swatch */
+  --swatch-1: #eeefef; /* Gallery Plaster Off-White (Primary Background) */
+  --swatch-2: #caccca; /* Architectural Concrete Grey (Borders, Soft Surfaces) */
+  --swatch-3: #8c8e90; /* Mid Stone Grey (Meta, Secondary Captions, Tracks) */
+  --swatch-4: #3e4143; /* Deep Slate Charcoal (Text Body, Headings, Subtitles) */
+  --swatch-5: #18191b; /* Matte Obsidian / Black Frames (Accents, Decisive CTAs, Active States) */
+}
+
+@theme {
+  --font-serif: 'Cormorant Garamond', Garamond, 'Times New Roman', Georgia, serif;
+  --font-sans: 'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer utilities {
+  .font-serif-luxury {
+    font-family: 'Cormorant Garamond', Garamond, 'Times New Roman', Georgia, serif;
+  }
+  .font-sans-clean {
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .font-cormorant {
+    font-family: 'Cormorant Garamond', Garamond, 'Times New Roman', Georgia, serif;
+  }
+  .font-google {
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ── WYSIWYG reading body — public journal reading view ──────────────────── */
+.wysiwyg-reading-body {
+  font-family: var(--font-serif-luxury, Georgia, serif);
+  color: #3e4143;
+}
+.wysiwyg-reading-body p {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  margin: 0 0 1.4rem;
+  font-weight: 300;
+}
+.wysiwyg-reading-body h1 {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  color: #18191b;
+  margin: 2rem 0 0.75rem;
+  line-height: 1.25;
+}
+.wysiwyg-reading-body h2 {
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: #18191b;
+  margin: 2rem 0 0.6rem;
+  line-height: 1.3;
+}
+.wysiwyg-reading-body h3 {
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #18191b;
+  margin: 1.5rem 0 0.5rem;
+}
+.wysiwyg-reading-body b,
+.wysiwyg-reading-body strong { font-weight: 700; color: #18191b; }
+.wysiwyg-reading-body i,
+.wysiwyg-reading-body em { font-style: italic; }
+.wysiwyg-reading-body u { text-decoration: underline; text-underline-offset: 3px; }
+.wysiwyg-reading-body s { text-decoration: line-through; }
+.wysiwyg-reading-body a {
+  color: #18191b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s;
+}
+.wysiwyg-reading-body a:hover { opacity: 0.6; }
+.wysiwyg-reading-body ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0 1.25rem;
+}
+.wysiwyg-reading-body ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0 1.25rem;
+}
+.wysiwyg-reading-body li { margin: 0.3rem 0; line-height: 1.7; }
+.wysiwyg-reading-body hr {
+  border: none;
+  border-top: 1px solid #caccca;
+  margin: 2.5rem 0;
+}
+/* Standard blockquote */
+.wysiwyg-reading-body blockquote {
+  border-left: 4px solid #c9966a;
+  padding: 1.25rem 1.5rem;
+  margin: 2.5rem 0;
+  background: rgba(255,255,255,0.5);
+  border-radius: 0.75rem;
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #18191b;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+/* Inline framed journal image */
+.wysiwyg-reading-body figure[data-journal-image] {
+  margin: 2.5rem 0;
+  padding: 1rem;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid #caccca;
+  border-radius: 1rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.wysiwyg-reading-body figure[data-journal-image] img {
+  width: 100%;
+  border-radius: 0.5rem;
+  display: block;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+.wysiwyg-reading-body figure[data-journal-image] figcaption {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #8c8e90;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-sans-clean, sans-serif);
+}
+/* Field Observation callout */
+.wysiwyg-reading-body [data-callout] {
+  margin: 2rem 0;
+  padding: 1.25rem 1.5rem;
+  background: #fdf8f2;
+  border: 1px solid #c9966a;
+  border-radius: 0.75rem;
+}
+.wysiwyg-reading-body [data-callout] span[style*="font-weight:700"],
+.wysiwyg-reading-body [data-callout] span:first-child {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #18191b;
+  display: block;
+  margin-bottom: 0.35rem;
+  font-style: normal;
+}
+.wysiwyg-reading-body [data-callout] span:last-child {
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #3e4143;
+}
+
