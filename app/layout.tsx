@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css'; // Global styles
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'Taslimah Woli — Documentary Photography',
@@ -23,6 +24,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body suppressHydrationWarning className="bg-[#eeefef] text-[#18191b] font-sans antialiased selection:bg-[#18191b] selection:text-[#eeefef]">
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
