@@ -370,7 +370,7 @@ export const JournalsCarousel: React.FC<JournalsCarouselProps> = ({
       </motion.div>
 
       {/* Navigation Arrow Controls: End-aware (dims at ends) */}
-      <div className="absolute inset-y-0 left-3 sm:left-8 md:left-12 flex items-center pointer-events-none">
+      <div className="hidden sm:flex absolute inset-y-0 left-3 sm:left-8 md:left-12 items-center pointer-events-none">
         <button
           onClick={handlePrev}
           disabled={activeIndex === 0}
@@ -385,7 +385,7 @@ export const JournalsCarousel: React.FC<JournalsCarouselProps> = ({
         </button>
       </div>
 
-      <div className="absolute inset-y-0 right-3 sm:right-8 md:right-12 flex items-center pointer-events-none">
+      <div className="hidden sm:flex absolute inset-y-0 right-3 sm:right-8 md:right-12 items-center pointer-events-none">
         <button
           onClick={handleNext}
           disabled={activeIndex === total - 1}
@@ -401,16 +401,40 @@ export const JournalsCarousel: React.FC<JournalsCarouselProps> = ({
       </div>
 
       {/* Active Journal Bottom Action CTA: Long Dark Bar Carrying Writing Title */}
-      <div className="mt-7 text-center px-4">
+      <div className="mt-7 text-center px-4 flex items-center justify-center gap-2 sm:gap-4">
+        {/* Mobile Prev Tap Target */}
+        <button
+          onClick={handlePrev}
+          disabled={activeIndex === 0}
+          aria-label="Previous journal entry"
+          className={`sm:hidden w-10 h-10 rounded-full bg-[#18191b] text-white flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-md ${
+            activeIndex === 0 ? 'opacity-25 pointer-events-none' : ''
+          }`}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
         <button
           onClick={() => onSelectJournal(activeJournal)}
-          className="group inline-flex items-center gap-2.5 max-w-[92vw] sm:max-w-2xl px-6 sm:px-8 py-3 rounded-full bg-[#18191b] hover:bg-[#3e4143] text-[#eeefef] text-xs font-sans-clean tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#18191b]"
+          className="group inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-2.5 sm:py-3 rounded-full bg-[#18191b] hover:bg-[#3e4143] text-[#eeefef] text-[11px] sm:text-xs font-sans-clean tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-xl active:scale-98 focus:outline-none focus:ring-2 focus:ring-[#18191b] max-w-[270px] sm:max-w-2xl truncate"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-white/70 shrink-0" />
+          <span className="w-1.5 h-1.5 rounded-full bg-white/70 shrink-0 hidden sm:inline-block" />
           <span className="truncate">
             Read {activeJournal.chapterLabel}: {activeJournal.title}
           </span>
           <BookOpen className="w-3.5 h-3.5 text-white/80 shrink-0 transition-transform group-hover:translate-x-0.5" />
+        </button>
+
+        {/* Mobile Next Tap Target */}
+        <button
+          onClick={handleNext}
+          disabled={activeIndex === total - 1}
+          aria-label="Next journal entry"
+          className={`sm:hidden w-10 h-10 rounded-full bg-[#18191b] text-white flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-md ${
+            activeIndex === total - 1 ? 'opacity-25 pointer-events-none' : ''
+          }`}
+        >
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
 

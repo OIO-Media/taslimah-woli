@@ -273,12 +273,12 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
       id="layout-a-container"
       className="relative w-full h-screen bg-[#eeefef] overflow-hidden select-none flex flex-col justify-between"
     >
-      {/* Left Edge PREV Navigation Control */}
+      {/* Left Edge PREV Navigation Control (Desktop) */}
       <button
         id="layout-a-prev-btn"
         onClick={handlePrev}
         aria-label="Previous portfolio panel"
-        className={`absolute left-0 top-1/2 -translate-y-1/2 z-30 flex items-center gap-2 pl-3 pr-3.5 py-10 text-[11px] tracking-[0.25em] uppercase font-sans-clean transition-all duration-300 group bg-[#eeefef]/90 hover:bg-white backdrop-blur-md border-r border-[#caccca] shadow-sm ${
+        className={`hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 items-center gap-2 pl-3 pr-3.5 py-10 text-[11px] tracking-[0.25em] uppercase font-sans-clean transition-all duration-300 group bg-[#eeefef]/90 hover:bg-white backdrop-blur-md border-r border-[#caccca] shadow-sm ${
           currentIndex === 0 ? 'text-[#8c8e90] hover:text-[#18191b]' : 'text-[#3e4143] hover:text-[#18191b]'
         }`}
       >
@@ -288,12 +288,12 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
         </span>
       </button>
 
-      {/* Right Edge NEXT Navigation Control */}
+      {/* Right Edge NEXT Navigation Control (Desktop) */}
       <button
         id="layout-a-next-btn"
         onClick={handleNext}
         aria-label="Next portfolio panel"
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-30 flex items-center gap-2 pr-3 pl-3.5 py-10 text-[11px] tracking-[0.25em] uppercase font-sans-clean transition-all duration-300 group bg-[#eeefef]/90 hover:bg-white backdrop-blur-md border-l border-[#caccca] shadow-sm text-[#3e4143] hover:text-[#18191b]"
+        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 items-center gap-2 pr-3 pl-3.5 py-10 text-[11px] tracking-[0.25em] uppercase font-sans-clean transition-all duration-300 group bg-[#eeefef]/90 hover:bg-white backdrop-blur-md border-l border-[#caccca] shadow-sm text-[#3e4143] hover:text-[#18191b]"
       >
         <span className="flex items-center gap-1.5 [writing-mode:vertical-lr] rotate-180">
           {currentIndex >= totalItems - 1 ? (
@@ -310,7 +310,7 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
         </span>
       </button>
 
-      {/* Main Horizontal Panels Viewport: 2 panels per screen extending directly to under the header down to footer */}
+      {/* Main Horizontal Panels Viewport: 2 panels per screen on desktop, 1 hero panel with peek on mobile */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -318,18 +318,16 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         id="layout-a-panels-wrapper"
-        className="w-full h-full flex items-start overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar touch-pan-x touch-pan-y pl-10 pr-14 sm:pl-14 sm:pr-18 lg:pl-20 lg:pr-24 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 pt-[57px] md:pt-[61px] pb-[53px] sm:pb-[57px]"
+        className="w-full h-full flex items-start overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar touch-pan-x pl-4 pr-10 sm:pl-8 sm:pr-14 md:pl-14 md:pr-18 lg:pl-20 lg:pr-24 gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12 pt-[54px] md:pt-[61px] pb-[54px] sm:pb-[58px]"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {displayItems.map((item, idx) => {
           const isHovered = hoveredIndex === idx;
           const isActiveLeading = currentIndex === idx;
 
-          // 2 Panels View with breathing room and margins in between:
-          // Desktop (lg+): Exactly 2 panels fit the screen with generous gap in between
-          // Tablet (md): 2 panels
-          // Mobile (sm/xs): 1 primary hero panel with glimpse of the next
-          const widthClass = 'w-[85vw] sm:w-[72vw] md:w-[calc((100vw-160px)/2)] lg:w-[calc((100vw-220px)/2)] xl:w-[calc((100vw-260px)/2)] 2xl:w-[calc((100vw-300px)/2)]';
+          // Mobile: 86vw for prominent hero framing with generous peek of next card
+          // Desktop: exactly 2 panels with architectural margins
+          const widthClass = 'w-[86vw] sm:w-[72vw] md:w-[calc((100vw-160px)/2)] lg:w-[calc((100vw-220px)/2)] xl:w-[calc((100vw-260px)/2)] 2xl:w-[calc((100vw-300px)/2)]';
 
           return (
             <div
@@ -341,7 +339,7 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
               }}
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
-              className={`relative flex-none ${widthClass} h-[calc(100vh-110px)] md:h-[calc(100vh-118px)] cursor-pointer snap-start overflow-hidden group border border-[#caccca] hover:border-[#18191b] transition-all duration-500 bg-[#18191b] shadow-[0_12px_35px_rgba(24,25,27,0.12)] hover:shadow-[0_24px_50px_rgba(24,25,27,0.22)]`}
+              className={`relative flex-none ${widthClass} h-[calc(100dvh-112px)] md:h-[calc(100vh-118px)] cursor-pointer snap-start overflow-hidden group border border-[#caccca] hover:border-[#18191b] transition-all duration-500 bg-[#18191b] shadow-[0_12px_35px_rgba(24,25,27,0.12)] hover:shadow-[0_24px_50px_rgba(24,25,27,0.22)]`}
             >
               {/* Image Container with Desaturated Cinematic Treatment & Zoom */}
               <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#18191b]">
@@ -403,15 +401,36 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
       {/* Bottom Bar: Copyright & Progress Scrub Bar */}
       <footer
         id="layout-a-footer"
-        className="fixed bottom-0 left-0 right-0 z-30 px-6 md:px-10 py-3.5 sm:py-4 bg-[#eeefef]/92 backdrop-blur-md border-t border-[#caccca] flex flex-wrap items-center justify-between gap-4 text-[#3e4143] text-[11px] tracking-wider font-sans-clean pointer-events-auto shadow-xs"
+        className="fixed bottom-0 left-0 right-0 z-30 px-3 sm:px-6 md:px-10 py-2.5 sm:py-3.5 bg-[#eeefef]/95 backdrop-blur-md border-t border-[#caccca] flex items-center justify-between gap-2 sm:gap-4 text-[#3e4143] text-[11px] tracking-wider font-sans-clean pointer-events-auto shadow-xs pb-safe"
       >
-        <div className="flex items-center gap-3 sm:gap-4">
-          <span className="text-[#18191b] font-medium">{footerText}</span>
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <span className="text-[#18191b] font-medium hidden sm:inline">{footerText}</span>
+          <span className="text-[#18191b] font-medium text-[10px] sm:hidden tracking-wider">TASLIMAH WOLI</span>
         </div>
 
         {/* Elongated Fluid Progress Slider Line & Dynamic Counter (01. / 12.) */}
-        <div className="flex items-center gap-3 sm:gap-4.5">
-          <span className="text-[11px] font-mono tracking-widest text-[#18191b] font-semibold tabular-nums min-w-[58px]">
+        <div className="flex items-center gap-2 sm:gap-4.5 flex-1 justify-end max-w-xl">
+          {/* Mobile Quick Prev/Next Chevron Controls */}
+          <div className="flex md:hidden items-center gap-1 shrink-0">
+            <button
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              aria-label="Previous image"
+              className="w-8 h-8 rounded-full bg-white/80 border border-[#caccca] flex items-center justify-center disabled:opacity-30 text-[#18191b] active:bg-[#18191b] active:text-white transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={currentIndex >= totalItems - 1}
+              aria-label="Next image"
+              className="w-8 h-8 rounded-full bg-white/80 border border-[#caccca] flex items-center justify-center disabled:opacity-30 text-[#18191b] active:bg-[#18191b] active:text-white transition-colors"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#18191b] font-semibold tabular-nums whitespace-nowrap">
             {formatIndex(currentIndex)} / {totalItems < 10 ? `0${totalItems}.` : `${totalItems}.`}
           </span>
 
@@ -432,7 +451,7 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
                 handleScrubInteraction(e.clientX, e.currentTarget);
               }
             }}
-            className="relative w-44 sm:w-64 md:w-80 lg:w-[420px] xl:w-[500px] 2xl:w-[580px] h-6 flex items-center cursor-pointer group/progress select-none touch-none"
+            className="relative flex-1 min-w-[60px] max-w-[110px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[440px] h-6 flex items-center cursor-pointer group/progress select-none touch-none"
             title="Drag or click to jump across portfolio"
           >
             {/* Track Background */}
@@ -455,7 +474,7 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
           </div>
 
           {/* Scroll Hint */}
-          <span className="hidden md:inline text-[9px] uppercase tracking-widest text-[#8c8e90] font-sans-clean">
+          <span className="hidden md:inline text-[9px] uppercase tracking-widest text-[#8c8e90] font-sans-clean whitespace-nowrap">
             Scroll or drag
           </span>
         </div>

@@ -33,6 +33,18 @@ export const AboutContactModal: React.FC<AboutContactModalProps> = ({
     message: '',
   });
 
+  // Lock background scroll when modal is active
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (prevInitialTab !== initialTab) {
     setPrevInitialTab(initialTab);
     setActiveTab(initialTab);
@@ -61,15 +73,15 @@ export const AboutContactModal: React.FC<AboutContactModalProps> = ({
   return (
     <div
       id="about-contact-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#18191b]/70 backdrop-blur-md text-[#18191b] animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 md:p-10 bg-[#18191b]/80 backdrop-blur-md text-[#18191b] animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-5xl max-h-[92vh] bg-[#eeefef] border border-[#caccca] rounded-none flex flex-col overflow-hidden shadow-2xl"
+        className="relative w-full h-full sm:h-auto sm:max-h-[92vh] max-w-5xl bg-[#eeefef] border-0 sm:border border-[#caccca] sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Navigation Bar */}
-        <div className="flex items-center justify-between px-5 sm:px-8 py-4 border-b border-[#caccca] bg-[#f7f8f8] overflow-x-auto">
+        <div className="flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4 border-b border-[#caccca] bg-[#f7f8f8] pt-safe overflow-x-auto">
           <div className="flex items-center gap-4 sm:gap-7 min-w-max">
             <button
               id="modal-tab-about"

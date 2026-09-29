@@ -426,8 +426,8 @@ export const CoverflowCarousel: React.FC<CoverflowCarouselProps> = ({
         })}
       </motion.div>
 
-      {/* Floating Arrow Navigation Buttons */}
-      <div className="absolute inset-y-0 left-4 sm:left-8 md:left-14 flex items-center pointer-events-none">
+      {/* Floating Arrow Navigation Buttons (Desktop / Tablet) */}
+      <div className="hidden sm:flex absolute inset-y-0 left-4 sm:left-8 md:left-14 items-center pointer-events-none">
         <button
           onClick={handlePrev}
           aria-label="Previous story project"
@@ -437,7 +437,7 @@ export const CoverflowCarousel: React.FC<CoverflowCarouselProps> = ({
         </button>
       </div>
 
-      <div className="absolute inset-y-0 right-4 sm:right-8 md:right-14 flex items-center pointer-events-none">
+      <div className="hidden sm:flex absolute inset-y-0 right-4 sm:right-8 md:right-14 items-center pointer-events-none">
         <button
           onClick={handleNext}
           aria-label="Next story project"
@@ -447,17 +447,33 @@ export const CoverflowCarousel: React.FC<CoverflowCarouselProps> = ({
         </button>
       </div>
 
-      {/* Active Story Action Button */}
-      <div className="mt-8 text-center px-4">
-        <div>
-          <button
-            onClick={() => onSelectProject(activeStory)}
-            className="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-[#18191b] hover:bg-[#3e4143] text-[#eeefef] text-xs font-sans-clean tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-xl hover:scale-103 focus:outline-none focus:ring-2 focus:ring-[#18191b]"
-          >
-            <span>Explore Full Story Essay ({activeStory.photoCount} Frames)</span>
-            <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </button>
-        </div>
+      {/* Active Story Action Button & Mobile Ergonomic Controls */}
+      <div className="mt-6 sm:mt-8 text-center px-4 flex items-center justify-center gap-2 sm:gap-4">
+        {/* Mobile Prev Tap Target */}
+        <button
+          onClick={handlePrev}
+          aria-label="Previous story"
+          className="sm:hidden w-10 h-10 rounded-full bg-[#18191b] text-white flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-md"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        <button
+          onClick={() => onSelectProject(activeStory)}
+          className="group inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-full bg-[#18191b] hover:bg-[#3e4143] text-[#eeefef] text-[11px] sm:text-xs font-sans-clean tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-xl active:scale-98 focus:outline-none focus:ring-2 focus:ring-[#18191b] max-w-[270px] sm:max-w-none truncate"
+        >
+          <span className="truncate">Explore Essay ({activeStory.photoCount} Frames)</span>
+          <ArrowUpRight className="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </button>
+
+        {/* Mobile Next Tap Target */}
+        <button
+          onClick={handleNext}
+          aria-label="Next story"
+          className="sm:hidden w-10 h-10 rounded-full bg-[#18191b] text-white flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-md"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Pagination Dots */}

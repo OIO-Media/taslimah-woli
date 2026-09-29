@@ -15,6 +15,37 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ item, onClose }) =
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Lock body scroll while modal is active
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  const touchStartXRef = React.useRef<number | null>(null);
+  const touchStartYRef = React.useRef<number | null>(null);
+
+  const handlePhotoTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handlePhotoTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const diffX = touchStartXRef.current - e.changedTouches[0].clientX;
+    const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        nextPhoto();
+      } else {
+        prevPhoto();
+      }
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
   if (!item) return null;
 
   const currentPhoto = item.gallery[activePhotoIdx] || {
@@ -34,32 +65,29 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ item, onClose }) =
   return (
     <div
       id="category-gallery-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#18191b]/70 backdrop-blur-md text-[#18191b] p-4 sm:p-6 md:p-10 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#18191b]/80 backdrop-blur-md text-[#18191b] p-0 sm:p-6 md:p-10 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-6xl max-h-[90vh] bg-[#eeefef] border border-[#caccca] rounded-none flex flex-col overflow-hidden shadow-2xl"
+        className="relative w-full h-full sm:h-auto sm:max-h-[92vh] max-w-6xl bg-[#eeefef] border-0 sm:border border-[#caccca] sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#caccca] bg-[#f7f8f8]">
-          <div className="flex items-center gap-3">
-            <span className="font-sans-clean text-xs font-bold tracking-widest text-[#8c8e90] uppercase">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#caccca] bg-[#f7f8f8] pt-safe">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <span className="font-sans-clean text-[10px] sm:text-xs font-bold tracking-widest text-[#8c8e90] uppercase shrink-0">
               {item.category}
             </span>
             <span className="text-[#caccca]">•</span>
-            <h3 className="font-serif-luxury text-xl tracking-wider uppercase text-[#18191b] font-light">
+            <h3 className="font-serif-luxury text-lg sm:text-xl tracking-wider uppercase text-[#18191b] font-light truncate">
               {item.layoutBTitle}
             </h3>
-            <span className="hidden sm:inline text-xs text-[#8c8e90] tracking-wider font-sans-clean">
-              ({item.tagline})
-            </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-1.5 text-[#8c8e90] hover:text-[#18191b] transition-colors focus:outline-none"
+              className="hidden sm:flex w-10 h-10 items-center justify-center text-[#8c8e90] hover:text-[#18191b] rounded-full transition-colors focus:outline-none"
               title="Toggle Fullscreen View"
             >
               <Maximize2 className="w-4 h-4" />
@@ -67,7 +95,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ item, onClose }) =
             <button
               id="close-category-modal-btn"
               onClick={onClose}
-              className="p-1.5 text-[#8c8e90] hover:text-[#18191b] transition-colors focus:outline-none"
+              className="w-10 h-10 flex items-center justify-center text-[#8c8e90] hover:text-[#18191b] active:bg-[#caccca]/40 rounded-full transition-colors focus:outline-none"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -77,8 +105,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ item, onClose }) =
 
         {/* Modal Body */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-y-auto">
-          {/* Main Photo Display */}
-          <div className="lg:col-span-8 relative bg-[#18191b] flex items-center justify-center min-h-[360px] sm:min-h-[480px] lg:min-h-[560px]">
+          {/* Main Photo Display with Touch Swiping */}
+          <div
+            onTouchStart={handlePhotoTouchStart}
+            onTouchEnd={handlePhotoTouchEnd}
+            className="lg:col-span-8 relative bg-[#18191b] flex items-center justify-center min-h-[360px] sm:min-h-[480px] lg:min-h-[560px] touch-pan-y select-none"
+          >
             <div className="relative w-full h-full min-h-[380px] sm:min-h-[480px]">
               <Image
                 src={optimizeImageUrl(currentPhoto.url, 1600, 75)}

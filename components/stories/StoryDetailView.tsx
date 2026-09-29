@@ -24,6 +24,62 @@ export const StoryDetailView: React.FC<StoryDetailViewProps> = ({
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
 
+  // Lock body scroll while lightbox is open
+  useEffect(() => {
+    if (selectedPhotoIndex !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedPhotoIndex]);
+
+  // Touch gesture tracking for mobile swipe navigation
+  const lightboxTouchStartXRef = React.useRef<number | null>(null);
+  const lightboxTouchStartYRef = React.useRef<number | null>(null);
+
+  const handleLightboxTouchStart = (e: React.TouchEvent) => {
+    lightboxTouchStartXRef.current = e.touches[0].clientX;
+    lightboxTouchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleLightboxTouchEnd = (e: React.TouchEvent) => {
+    if (lightboxTouchStartXRef.current === null || lightboxTouchStartYRef.current === null) return;
+    const diffX = lightboxTouchStartXRef.current - e.changedTouches[0].clientX;
+    const diffY = lightboxTouchStartYRef.current - e.changedTouches[0].clientY;
+
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        // Swipe left -> Next photo
+        setSelectedPhotoIndex((prev) => (prev !== null ? (prev + 1) % project.photos.length : null));
+      } else {
+        // Swipe right -> Prev photo
+        setSelectedPhotoIndex((prev) =>
+          prev !== null ? (prev - 1 + project.photos.length) % project.photos.length : null
+        );
+      }
+    } else if (diffY < -70 && Math.abs(diffY) > Math.abs(diffX)) {
+      // Swipe down -> Dismiss lightbox
+      setSelectedPhotoIndex(null);
+    }
+
+    lightboxTouchStartXRef.current = null;
+    lightboxTouchStartYRef.current = null;
+  };
+
+  // Lock body scroll while lightbox is open
+  useEffect(() => {
+    if (selectedPhotoIndex !== null) {
+      const originalStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [selectedPhotoIndex]);
+
   // Scroll to top when project changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -341,6 +397,8 @@ export const StoryDetailView: React.FC<StoryDetailViewProps> = ({
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-6"
             onClick={() => setSelectedPhotoIndex(null)}
+            onTouchStart={handleLightboxTouchStart}
+            onTouchEnd={handleLightboxTouchEnd}
           >
             {/* Top Toolbar */}
             <div

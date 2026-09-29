@@ -38,6 +38,50 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
 
+  // Touch gesture handling for mobile lightbox swipe
+  const lightboxTouchStartXRef = React.useRef<number | null>(null);
+  const lightboxTouchStartYRef = React.useRef<number | null>(null);
+
+  const handleLightboxTouchStart = (e: React.TouchEvent) => {
+    lightboxTouchStartXRef.current = e.touches[0].clientX;
+    lightboxTouchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleLightboxTouchEnd = (e: React.TouchEvent) => {
+    if (lightboxTouchStartXRef.current === null || lightboxTouchStartYRef.current === null) return;
+    const diffX = lightboxTouchStartXRef.current - e.changedTouches[0].clientX;
+    const diffY = lightboxTouchStartYRef.current - e.changedTouches[0].clientY;
+
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        // Swipe left -> Next photo
+        setSelectedPhotoIndex((prev) => (prev !== null ? (prev + 1) % project.photos.length : null));
+      } else {
+        // Swipe right -> Prev photo
+        setSelectedPhotoIndex((prev) =>
+          prev !== null ? (prev - 1 + project.photos.length) % project.photos.length : null
+        );
+      }
+    } else if (diffY < -70 && Math.abs(diffY) > Math.abs(diffX)) {
+      // Swipe down -> Dismiss lightbox
+      setSelectedPhotoIndex(null);
+    }
+
+    lightboxTouchStartXRef.current = null;
+    lightboxTouchStartYRef.current = null;
+  };
+
+  // Lock body scroll while lightbox is open
+  useEffect(() => {
+    if (selectedPhotoIndex !== null) {
+      const originalStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [selectedPhotoIndex]);
+
   // Scroll to top when project changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -92,7 +136,8 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
           <span className="w-7 h-7 rounded-full bg-[#18191b] text-[#eeefef] group-hover:bg-[#3e4143] flex items-center justify-center transition-colors shadow-xs">
             <ArrowLeft className="w-3.5 h-3.5" />
           </span>
-          <span className="font-semibold">Return to Assignments Carousel</span>
+          <span className="font-semibold hidden sm:inline">Return to Assignments Carousel</span>
+          <span className="font-semibold sm:hidden">Return to Carousel</span>
         </button>
 
         <div className="flex items-center gap-3">
@@ -369,9 +414,15 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-8 select-none"
+            onClick={() => setSelectedPhotoIndex(null)}
+            onTouchStart={handleLightboxTouchStart}
+            onTouchEnd={handleLightboxTouchEnd}
           >
             {/* Top Bar */}
-            <div className="flex items-center justify-between text-white/80 z-10">
+            <div
+              className="flex items-center justify-between text-white/80 z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="text-xs tracking-widest uppercase font-sans-clean">
                 <span className="text-white font-medium">{project.title}</span>
                 <span className="mx-2 text-white/40">/</span>
@@ -392,7 +443,10 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
             </div>
 
             {/* Main Center Image */}
-            <div className="relative flex-1 w-full max-h-[78vh] my-auto flex items-center justify-center">
+            <div
+              className="relative flex-1 w-full max-h-[78vh] my-auto flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="relative w-full h-full max-w-5xl">
                 <PortfolioImage
                   src={project.photos[selectedPhotoIndex].url}
@@ -430,7 +484,10 @@ export const AssignmentDetailView: React.FC<AssignmentDetailViewProps> = ({
             </div>
 
             {/* Bottom Caption & EXIF */}
-            <div className="text-center max-w-2xl mx-auto z-10">
+            <div
+              className="text-center max-w-2xl mx-auto z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
               <p className="text-white text-sm sm:text-base font-serif-luxury mb-1">
                 {project.photos[selectedPhotoIndex].caption}
               </p>
