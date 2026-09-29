@@ -16,6 +16,15 @@ export const metadata: Metadata = {
     title: 'Taslimah Woli — Documentary Photography',
     description: 'Documentary photographer based in Nigeria. Spatial research and documentary photography exploring people, architecture, and inhabited spaces.',
   },
+  icons: {
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
