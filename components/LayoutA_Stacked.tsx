@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Eye, RotateCcw } from 'lucide-react';
 import { PORTFOLIO_ITEMS, PortfolioItem } from '@/lib/portfolio-data';
 import { DARK_BLUR_DATA_URL, optimizeImageUrl } from '@/lib/image-utils';
 import { usePublishedContent } from '@/lib/cms-store';
+import { PortfolioImage } from '@/components/ui/PortfolioImage';
 
 interface LayoutAProps {
   items?: PortfolioItem[];
@@ -344,18 +345,13 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
             >
               {/* Image Container with Desaturated Cinematic Treatment & Zoom */}
               <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#18191b]">
-                <Image
-                  src={optimizeImageUrl(item.image, 1400, 75)}
+                <PortfolioImage
+                  src={item.image}
                   alt={item.imageAlt}
-                  fill
+                  context="hero"
                   priority={idx < 2}
-                  loading={idx < 2 ? undefined : 'lazy'}
-                  placeholder={item.image.startsWith('data:') ? undefined : 'blur'}
-                  blurDataURL={DARK_BLUR_DATA_URL}
-                  unoptimized={item.image.startsWith('data:') || !item.image.includes('unsplash.com')}
-                  quality={75}
                   sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 50vw"
-                  referrerPolicy="no-referrer"
+                  protection={true}
                   className={`object-cover object-center transition-all duration-700 ease-out filter ${
                     isHovered
                       ? 'scale-105 brightness-95 saturate-100 contrast-105'
