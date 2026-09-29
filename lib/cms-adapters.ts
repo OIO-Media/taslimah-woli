@@ -23,6 +23,7 @@ import {
   PrintItemCMS,
   GalleryPhoto,
 } from './cms-types';
+import { extractExcerptFromHtml } from './cms-journal-utils';
 
 // ─── Stories ────────────────────────────────────────────────────────────────
 
@@ -118,7 +119,7 @@ export function cmsJournalToPublic(journal: JournalEntryCMS, index: number): Jou
     accentBg: (journal as any).accentBg || 'rgba(62, 65, 67, 0.12)',
     coverImage: journal.coverImage,
     coverImageAlt: (journal as any).coverImageAlt || journal.title,
-    excerpt: journal.excerpt,
+    excerpt: journal.excerpt || extractExcerptFromHtml(journal.bodyHtml || ''),
     author: (journal as any).author || {
       name: 'Taslimah Woli',
       role: 'Documentary Photographer & Researcher',

@@ -7,7 +7,7 @@ import { ImageUploader } from './ImageUploader';
 import { WysiwygEditor } from './WysiwygEditor';
 import { ConfirmModal } from './ConfirmModal';
 import { Plus, Trash2, ArrowUp, ArrowDown, BookOpen, Clock, Calendar, MapPin, Sparkles } from 'lucide-react';
-import { calculateReadTime } from '@/lib/cms-journal-utils';
+import { calculateReadTime, extractExcerptFromHtml } from '@/lib/cms-journal-utils';
 
 interface JournalsEditorProps {
   journals: JournalEntryCMS[];
@@ -232,25 +232,16 @@ export const JournalsEditor: React.FC<JournalsEditorProps> = ({ journals, onChan
             helperText="Featured cover image for journals carousel."
           />
 
-          <div>
-            <label className="block text-xs font-sans-clean font-medium text-[#18191b] mb-1">
-              Excerpt / Lead
-            </label>
-            <textarea
-              rows={2}
-              placeholder="Opening sentence or summary displayed on the card..."
-              value={newExcerpt}
-              onChange={(e) => setNewExcerpt(e.target.value)}
-              className="w-full text-xs px-3 py-2 rounded-lg border border-[#caccca] bg-white text-[#18191b] focus:outline-none focus:border-[#18191b]"
-            />
-          </div>
-
           <WysiwygEditor
             label="Full Essay Body (Reading View)"
             value={newBody}
             onChange={(val) => {
               setNewBody(val);
               setNewReadTime(calculateReadTime(val));
+              const extracted = extractExcerptFromHtml(val);
+              if (extracted) {
+                setNewExcerpt(extracted);
+              }
             }}
             placeholder="Begin writing the essay here — use the toolbar above to format headings, bold, lists, and more…"
             minHeight="320px"
@@ -463,18 +454,6 @@ export const JournalsEditor: React.FC<JournalsEditorProps> = ({ journals, onChan
                 helperText="Primary image displayed in carousel card."
               />
 
-              <div>
-                <label className="block text-xs font-sans-clean font-medium text-[#18191b] mb-1">
-                  Card Excerpt
-                </label>
-                <textarea
-                  rows={2}
-                  value={activeJournal.excerpt}
-                  onChange={(e) => handleUpdateActive('excerpt', e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-lg border border-[#caccca] bg-white text-[#18191b] focus:outline-none focus:border-[#18191b]"
-                />
-              </div>
-
               {/* WYSIWYG Body */}
               <WysiwygEditor
                 label="Full Journal Text (Reading View)"
@@ -482,6 +461,10 @@ export const JournalsEditor: React.FC<JournalsEditorProps> = ({ journals, onChan
                 onChange={(val) => {
                   handleUpdateActive('bodyHtml', val);
                   handleUpdateActive('readTime', calculateReadTime(val));
+                  const autoExcerpt = extractExcerptFromHtml(val);
+                  if (autoExcerpt) {
+                    handleUpdateActive('excerpt', autoExcerpt);
+                  }
                 }}
                 minHeight="420px"
                 placeholder="Begin writing — use the toolbar for headings, bold, lists, and blockquotes. Select any text for a quick formatting bubble."

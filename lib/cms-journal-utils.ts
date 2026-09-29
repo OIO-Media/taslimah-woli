@@ -38,3 +38,33 @@ export function countWords(content: string): number {
     .trim();
   return clean ? clean.split(/\s+/).filter(Boolean).length : 0;
 }
+
+/**
+ * Extracts a concise excerpt from HTML content.
+ * Prioritizes <blockquote> (pull quotes) or the first <p> paragraph.
+ */
+export function extractExcerptFromHtml(html: string): string {
+  if (!html || typeof html !== 'string') return '';
+  // Check for blockquote first (pull quote / card excerpt)
+  const bqMatch = html.match(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/i);
+  if (bqMatch) {
+    const text = bqMatch[1]
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&ldquo;|&rdquo;|&quot;|"/g, '')
+      .replace(/&[a-z0-9#]+;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (text) return text;
+  }
+  // Fallback to first non-empty paragraph
+  const pMatches = html.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+  for (const match of pMatches) {
+    const text = match[1]
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&[a-z0-9#]+;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (text) return text;
+  }
+  return '';
+}
