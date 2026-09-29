@@ -49,24 +49,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, session });
       }
 
-      // 2. Fallback to registered users if DB is unconfigured or offline
+      // 2. Secure environment-driven emergency fallback (only active if explicitly configured in environment)
+      const emergencyPassword = process.env.CMS_EMERGENCY_ADMIN_PASSWORD;
       if (
+        emergencyPassword &&
+        password === emergencyPassword &&
         (inputUser === REGISTERED_USERS.owner.email.toLowerCase() ||
-          inputUser === REGISTERED_USERS.owner.username.toLowerCase()) &&
-        password === REGISTERED_USERS.owner.expectedPlain
+          inputUser === REGISTERED_USERS.owner.username.toLowerCase())
       ) {
         resetLoginAttempts(username.toLowerCase());
         const session = createSession(REGISTERED_USERS.owner);
-        return NextResponse.json({ success: true, session });
-      }
-
-      if (
-        (inputUser === REGISTERED_USERS.developer.username.toLowerCase() ||
-          inputUser === 'ohayo') &&
-        password === REGISTERED_USERS.developer.expectedPlain
-      ) {
-        resetLoginAttempts(username.toLowerCase());
-        const session = createSession(REGISTERED_USERS.developer);
         return NextResponse.json({ success: true, session });
       }
 

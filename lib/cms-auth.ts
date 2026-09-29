@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { CMSUserSession, CMSUserRole } from './cms-types';
 
 export interface CMSUserAccount {
@@ -6,47 +7,23 @@ export interface CMSUserAccount {
   email: string;
   role: CMSUserRole;
   name: string;
-  // Hashed password representation
-  salt: string;
-  hash: string;
 }
 
-// Fixed salt for consistent deterministic verification across environments
-// For production accounts, we pre-hash with SHA-256 + salt
-// Salt and Hash generated for:
-// 1. taslimah@taslimahwoli.com / "TaslimahWoli2026!Studio"
-// 2. Ohayo / "OhayoDeveloper2026!DevAccess"
+const AUTH_SECRET =
+  process.env.CMS_AUTH_SECRET ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  'taslimah-woli-studio-secure-auth-secret-key-2026';
 
-const OWNER_SALT = 'tw_salt_77a94f1c98e2';
-const DEV_SALT = 'ohayo_salt_91b2c4d8e3f7';
+// Session lifetime: 2 hours for enhanced administrative security
+export const SESSION_EXPIRY_MS = 2 * 60 * 60 * 1000;
 
-// Helper to hash password with salt using Web Crypto API
-export async function hashPassword(password: string, salt: string): Promise<string> {
-  const enc = new TextEncoder();
-  const data = enc.encode(`${salt}:${password}`);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-// Pre-computed hashes will be initialized or dynamically verified
-export const REGISTERED_USERS: Record<string, {
-  id: string;
-  username: string;
-  email: string;
-  role: CMSUserRole;
-  name: string;
-  salt: string;
-  expectedPlain: string; // for instant zero-dependency fallback verification
-}> = {
+export const REGISTERED_USERS: Record<string, CMSUserAccount> = {
   owner: {
     id: 'user-taslimah',
     username: 'taslimah',
     email: 'taslimah@taslimahwoli.com',
     role: 'owner',
     name: 'Taslimah Woli',
-    salt: OWNER_SALT,
-    expectedPlain: 'TaslimahWoli2026!Studio',
   },
   developer: {
     id: 'user-ohayo',
@@ -54,8 +31,6 @@ export const REGISTERED_USERS: Record<string, {
     email: 'dev@ohayo.internal',
     role: 'developer',
     name: 'Ohayo (Developer Maintenance)',
-    salt: DEV_SALT,
-    expectedPlain: 'OhayoDeveloper2026!DevAccess',
   },
 };
 
@@ -97,18 +72,17 @@ export function resetLoginAttempts(identifier: string) {
   loginAttempts.delete(identifier);
 }
 
-// Generate secure random hex token
+// Generate cryptographically signed HMAC-SHA256 session token
 export function generateSessionToken(userId: string, role: CMSUserRole): string {
-  const randomBytes = new Uint8Array(24);
-  crypto.getRandomValues(randomBytes);
-  const randomHex = Array.from(randomBytes).map((b) => b.toString(16).padStart(2, '0')).join('');
-  const timestamp = Date.now();
-  return `${role}_${userId}_${timestamp}_${randomHex}`;
+  const timestamp = Date.now().toString();
+  const randomHex = crypto.randomBytes(16).toString('hex');
+  const payload = `${role}_${userId}_${timestamp}_${randomHex}`;
+  const signature = crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('hex');
+  return `${payload}.${signature}`;
 }
 
-export function createSession(user: CMSUserAccount | typeof REGISTERED_USERS['owner']): CMSUserSession {
+export function createSession(user: CMSUserAccount): CMSUserSession {
   const token = generateSessionToken(user.id, user.role);
-  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
   return {
     user: {
       id: user.id,
@@ -118,19 +92,39 @@ export function createSession(user: CMSUserAccount | typeof REGISTERED_USERS['ow
       name: user.name,
     },
     token,
-    expiresAt: Date.now() + sevenDaysMs,
+    expiresAt: Date.now() + SESSION_EXPIRY_MS,
   };
 }
 
 export function verifySessionToken(token: string): boolean {
-  if (!token) return false;
+  if (!token || typeof token !== 'string') return false;
   try {
-    const parts = token.split('_');
+    const dotIndex = token.lastIndexOf('.');
+    if (dotIndex === -1) return false;
+
+    const payload = token.substring(0, dotIndex);
+    const signature = token.substring(dotIndex + 1);
+
+    const parts = payload.split('_');
     if (parts.length < 4) return false;
+
     const timestamp = parseInt(parts[2], 10);
     if (isNaN(timestamp)) return false;
-    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-    return Date.now() - timestamp < sevenDaysMs;
+
+    // Reject tokens older than 2 hours or timestamp in the future (>60s skew)
+    const now = Date.now();
+    if (now - timestamp > SESSION_EXPIRY_MS || timestamp > now + 60000) {
+      return false;
+    }
+
+    const expectedSignature = crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('hex');
+
+    // Constant-time comparison to prevent timing side-channel attacks
+    const sigBuffer = Buffer.from(signature, 'utf8');
+    const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+    if (sigBuffer.length !== expectedBuffer.length) return false;
+
+    return crypto.timingSafeEqual(sigBuffer, expectedBuffer);
   } catch {
     return false;
   }

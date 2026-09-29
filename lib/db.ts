@@ -144,6 +144,12 @@ export async function verifyUserCredentialsFromDB(
 
   try {
     const clean = usernameOrEmail.trim().toLowerCase();
+
+    // Strict validation to prevent PostgREST syntax and filter injection
+    if (!/^[a-zA-Z0-9@._+-]{1,100}$/.test(clean)) {
+      return { success: false, error: 'Invalid username or email format' };
+    }
+
     const { data: user, error } = await supabaseAdmin
       .from('cms_users')
       .select('*')

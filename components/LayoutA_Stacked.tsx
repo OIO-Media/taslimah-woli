@@ -350,6 +350,7 @@ export const LayoutA_Stacked: React.FC<LayoutAProps> = ({
                   alt={item.imageAlt}
                   context="hero"
                   priority={idx < 2}
+                  containerClassName="w-full h-full"
                   sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 50vw"
                   protection={true}
                   className={`object-cover object-center transition-all duration-700 ease-out filter ${

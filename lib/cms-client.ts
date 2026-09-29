@@ -22,13 +22,15 @@ export function getStoredSession(): CMSUserSession | null {
   }
 }
 
-export function setStoredSession(session: CMSUserSession, remember = true) {
+export function setStoredSession(session: CMSUserSession, remember = false) {
   if (typeof window === 'undefined') return;
   try {
     const str = JSON.stringify(session);
     sessionStorage.setItem(SESSION_STORAGE_KEY, str);
     if (remember) {
       localStorage.setItem(SESSION_STORAGE_KEY, str);
+    } else {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
     }
   } catch (err) {
     console.error('Failed to store session:', err);
@@ -69,6 +71,35 @@ export function useCMSAuth(requiredRole?: CMSUserRole) {
     readSession();
   }, [readSession]);
 
+  const logout = useCallback(() => {
+    clearStoredSession();
+    setSession(null);
+  }, []);
+
+  // Inactivity auto-logout: Automatically logs out after 30 minutes of idle time
+  useEffect(() => {
+    if (!session) return;
+
+    const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+    let timeoutId: NodeJS.Timeout;
+
+    const handleActivity = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        logout();
+      }, INACTIVITY_TIMEOUT_MS);
+    };
+
+    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+    events.forEach((ev) => window.addEventListener(ev, handleActivity, { passive: true }));
+    handleActivity();
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach((ev) => window.removeEventListener(ev, handleActivity));
+    };
+  }, [session, logout]);
+
   const login = useCallback(
     async (username: string, password: string): Promise<{ success: boolean; error?: string; session?: CMSUserSession }> => {
       try {
@@ -88,55 +119,11 @@ export function useCMSAuth(requiredRole?: CMSUserRole) {
         setSession(userSession);
         return { success: true, session: userSession };
       } catch (err: any) {
-        // Fallback offline verification if API is offline
-        const input = username.trim().toLowerCase();
-        if (
-          (input === 'taslimah@taslimahwoli.com' || input === 'taslimah') &&
-          password === 'TaslimahWoli2026!Studio'
-        ) {
-          const fallbackSession: CMSUserSession = {
-            user: {
-              id: 'user-taslimah',
-              username: 'taslimah',
-              email: 'taslimah@taslimahwoli.com',
-              role: 'owner',
-              name: 'Taslimah Woli',
-            },
-            token: `owner_taslimah_${Date.now()}_local`,
-            expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
-          };
-          setStoredSession(fallbackSession);
-          setSession(fallbackSession);
-          return { success: true, session: fallbackSession };
-        }
-
-        if (input === 'ohayo' && password === 'OhayoDeveloper2026!DevAccess') {
-          const fallbackSession: CMSUserSession = {
-            user: {
-              id: 'user-ohayo',
-              username: 'Ohayo',
-              email: 'dev@ohayo.internal',
-              role: 'developer',
-              name: 'Ohayo (Developer Maintenance)',
-            },
-            token: `dev_ohayo_${Date.now()}_local`,
-            expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
-          };
-          setStoredSession(fallbackSession);
-          setSession(fallbackSession);
-          return { success: true, session: fallbackSession };
-        }
-
         return { success: false, error: err?.message || 'Network error during login' };
       }
     },
     []
   );
-
-  const logout = useCallback(() => {
-    clearStoredSession();
-    setSession(null);
-  }, []);
 
   return {
     session,

@@ -66,9 +66,13 @@ export const PortfolioImage: React.FC<PortfolioImageProps> = ({
 
   const blurPlaceholder = blurTheme === 'warm' ? WARM_BLUR_DATA_URL : DARK_BLUR_DATA_URL;
 
+  const baseContainerClass = fill
+    ? 'relative w-full h-full overflow-hidden'
+    : 'relative overflow-hidden';
+
   return (
     <div
-      className={`relative overflow-hidden ${aspectClass} ${containerClassName}`}
+      className={`${baseContainerClass} ${aspectClass} ${containerClassName}`}
       onContextMenu={protection ? (e) => e.preventDefault() : undefined}
     >
       <Image
@@ -87,9 +91,7 @@ export const PortfolioImage: React.FC<PortfolioImageProps> = ({
           setIsLoaded(true);
           if (onLoad) onLoad(e);
         }}
-        className={`object-cover transition-opacity duration-700 ease-out select-none ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        } ${className}`}
+        className={`object-cover transition-all duration-700 ease-out select-none ${className}`}
         {...props}
       />
     </div>
