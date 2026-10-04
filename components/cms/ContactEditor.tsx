@@ -207,7 +207,7 @@ export const ContactEditor: React.FC<ContactEditorProps> = ({
                 </label>
                 <input
                   type="email"
-                  placeholder="inquiries@taslimahwoli.com"
+                  placeholder="hello@taslimahwoli.com"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   className="w-full text-xs px-3 py-2 rounded-lg border border-[#caccca] bg-white text-[#18191b] focus:outline-none focus:border-[#18191b]"

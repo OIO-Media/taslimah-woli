@@ -143,10 +143,10 @@ export default function AboutPage() {
                     </span>
                   )}
                   <a
-                    href={`mailto:${about?.email || 'inquiries@taslimahwoli.com'}`}
+                    href={`mailto:${about?.email || 'hello@taslimahwoli.com'}`}
                     className="text-xs font-sans-clean font-medium text-[#18191b] hover:text-[#3e4143] underline underline-offset-4 tracking-wide"
                   >
-                    {about?.email || 'inquiries@taslimahwoli.com'}
+                    {about?.email || 'hello@taslimahwoli.com'}
                   </a>
                 </div>
 

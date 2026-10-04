@@ -387,7 +387,7 @@ export const ARTIST_INFO = {
     'Architectural Ateliers & Cultural Institutions',
     'Selected Brands & Publishing Houses',
   ],
-  email: 'inquiries@taslimahwoli.com',
+  email: 'hello@taslimahwoli.com',
   phone: 'Available on request',
   location: 'Nigeria · Available for local & international assignments',
 };

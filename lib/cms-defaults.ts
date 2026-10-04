@@ -118,7 +118,7 @@ export const INITIAL_CMS_DATA: FullCMSData = {
         order: 4,
       },
     ],
-    email: 'inquiries@taslimahwoli.com',
+    email: 'hello@taslimahwoli.com',
     phone: 'Available on request',
     location: 'Nigeria · Operating Nationally & Across Africa',
     socials: {
@@ -212,7 +212,7 @@ export const INITIAL_CMS_DATA: FullCMSData = {
       address: 'Direct commissioning desk for documentary, architectural, and editorial assignments.',
       postal: 'Local & International Coverage',
       tel: 'Direct inquiry via email',
-      email: 'inquiries@taslimahwoli.com',
+      email: 'hello@taslimahwoli.com',
       order: 0,
     },
     {
@@ -222,7 +222,7 @@ export const INITIAL_CMS_DATA: FullCMSData = {
       address: 'Research-led documentary projects, long-term archives, and institutional collaborations.',
       postal: 'Nigeria · Operating Nationally & Across Africa',
       tel: 'Field bookings & consultations',
-      email: 'studio@taslimahwoli.com',
+      email: 'hello@taslimahwoli.com',
       order: 1,
     },
     {
@@ -232,7 +232,7 @@ export const INITIAL_CMS_DATA: FullCMSData = {
       address: 'Limited edition archival pigment prints on 100% cotton rag, signed and numbered with Certificate of Authenticity.',
       postal: 'Insured worldwide shipping & crating',
       tel: 'Framing & acquisition inquiries',
-      email: 'prints@taslimahwoli.com',
+      email: 'hello@taslimahwoli.com',
       order: 2,
     },
   ],
