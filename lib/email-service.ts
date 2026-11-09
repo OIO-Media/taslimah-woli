@@ -29,10 +29,15 @@ export async function sendOtpEmail(toEmail: string, otpCode: string): Promise<{ 
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // Port 587 with STARTTLS
       auth: {
         user: smtpUser,
         pass: smtpPass.replace(/\s+/g, ''), // Strip spaces if pasted with spaces from Google
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
