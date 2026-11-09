@@ -125,11 +125,43 @@ export function useCMSAuth(requiredRole?: CMSUserRole) {
     []
   );
 
+  const resetPassword = useCallback(
+    async (
+      username: string,
+      recoveryKey: string,
+      newPassword: string
+    ): Promise<{ success: boolean; error?: string; message?: string }> => {
+      try {
+        const res = await fetch('/api/cms/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'reset-password',
+            username,
+            recoveryKey,
+            newPassword,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return { success: false, error: data.error || 'Failed to reset password' };
+        }
+
+        return { success: true, message: data.message };
+      } catch (err: any) {
+        return { success: false, error: err?.message || 'Network error during password reset' };
+      }
+    },
+    []
+  );
+
   return {
     session,
     isAuthenticated: !!session,
     loading,
     login,
+    resetPassword,
     logout,
     refreshSession,
   };

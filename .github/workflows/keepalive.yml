@@ -1,0 +1,15 @@
+name: Supabase Database Keepalive
+
+on:
+  schedule:
+    # Run every Monday and Thursday at 06:00 UTC (every 3-4 days)
+    - cron: '0 6 * * 1,4'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Keepalive API
+        run: |
+          curl -f -s -S https://www.taslimahwoli.com/api/cron/keepalive || true

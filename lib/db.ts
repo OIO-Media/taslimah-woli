@@ -180,3 +180,49 @@ export async function verifyUserCredentialsFromDB(
     return { success: false, error: err?.message || 'Database auth error' };
   }
 }
+
+/**
+ * Reset a user's password in the database with a freshly salted bcrypt hash.
+ */
+export async function resetUserPasswordInDB(
+  usernameOrEmail: string,
+  newPlainPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Database unconfigured' };
+  }
+
+  try {
+    const clean = usernameOrEmail.trim().toLowerCase();
+    if (!/^[a-zA-Z0-9@._+-]{1,100}$/.test(clean)) {
+      return { success: false, error: 'Invalid username or email format' };
+    }
+
+    const { data: user, error: findError } = await supabaseAdmin
+      .from('cms_users')
+      .select('id, username')
+      .or(`email.ilike.${clean},username.ilike.${clean}`)
+      .single();
+
+    if (findError || !user) {
+      return { success: false, error: 'Account not found in database' };
+    }
+
+    const newHash = await bcrypt.hash(newPlainPassword, 10);
+
+    const { error: updateError } = await supabaseAdmin
+      .from('cms_users')
+      .update({ password_hash: newHash })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('[DB] Failed to update password hash:', updateError);
+      return { success: false, error: updateError.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('[DB] Reset password error:', err);
+    return { success: false, error: err?.message || 'Database error while resetting password' };
+  }
+}
