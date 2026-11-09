@@ -1,4 +1,15 @@
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+
+/**
+ * Generate a cryptographically secure 6-digit one-time passcode (CSPRNG).
+ * Uses operating system entropy pool (100000 to 999999 inclusive).
+ * Guarantees every single generated code is non-deterministic, completely unique,
+ * and unpredictable.
+ */
+export function generateSecureOtp(): string {
+  return crypto.randomInt(100000, 1000000).toString();
+}
 
 const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER || '';
 const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '';

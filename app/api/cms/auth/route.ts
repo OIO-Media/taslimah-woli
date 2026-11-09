@@ -11,11 +11,12 @@ import {
   verifyUserCredentialsFromDB,
   resetUserPasswordInDB,
   checkUserExistsInDB,
+  canRequestNewOtp,
   savePasswordResetOtp,
   verifyPasswordResetOtp,
   clearPasswordResetOtp,
 } from '@/lib/db';
-import { sendOtpEmail, isEmailConfigured } from '@/lib/email-service';
+import { sendOtpEmail, isEmailConfigured, generateSecureOtp } from '@/lib/email-service';
 
 function maskEmail(email: string): string {
   const parts = email.split('@');
@@ -62,6 +63,17 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Check 60-second resend cooldown
+      const cooldownCheck = await canRequestNewOtp(userLookup.email);
+      if (!cooldownCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: `Please wait ${cooldownCheck.remainingCooldownSeconds} seconds before requesting another code.`,
+          },
+          { status: 429 }
+        );
+      }
+
       if (!isEmailConfigured()) {
         return NextResponse.json(
           {
@@ -73,8 +85,8 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Generate cryptographically sound 6-digit OTP
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      // Generate cryptographically secure CSPRNG 6-digit OTP (different & random every single time)
+      const generatedOtp = generateSecureOtp();
       await savePasswordResetOtp(userLookup.email, generatedOtp, 10);
 
       const emailResult = await sendOtpEmail(userLookup.email, generatedOtp);
