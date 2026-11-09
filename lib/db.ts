@@ -226,3 +226,147 @@ export async function resetUserPasswordInDB(
     return { success: false, error: err?.message || 'Database error while resetting password' };
   }
 }
+
+// In-memory fallback for serverless runtime resilience
+const memoryOtpStore = new Map<string, { otpHash: string; expiresAt: number }>();
+
+/**
+ * Check if an email or username exists in the system.
+ */
+export async function checkUserExistsInDB(
+  emailOrUsername: string
+): Promise<{ exists: boolean; email?: string; username?: string }> {
+  const clean = emailOrUsername.trim().toLowerCase();
+
+  if (supabaseAdmin) {
+    try {
+      const { data: user } = await supabaseAdmin
+        .from('cms_users')
+        .select('email, username')
+        .or(`email.ilike.${clean},username.ilike.${clean}`)
+        .single();
+
+      if (user) {
+        return { exists: true, email: user.email, username: user.username };
+      }
+    } catch (err) {
+      console.warn('[DB] Could not query cms_users, checking fallback:', err);
+    }
+  }
+
+  // Fallback check against REGISTERED_USERS
+  const fallbackUsers = [
+    { email: 'taslimah@taslimahwoli.com', username: 'taslimah' },
+    { email: 'dev@ohayo.internal', username: 'ohayo' },
+  ];
+
+  const matched = fallbackUsers.find(
+    (u) => u.email.toLowerCase() === clean || u.username.toLowerCase() === clean
+  );
+
+  if (matched) {
+    return { exists: true, email: matched.email, username: matched.username };
+  }
+
+  return { exists: false };
+}
+
+/**
+ * Store an OTP with an expiration timestamp.
+ */
+export async function savePasswordResetOtp(
+  email: string,
+  plainOtp: string,
+  expiresInMinutes = 10
+): Promise<boolean> {
+  const clean = email.trim().toLowerCase();
+  const expiresAt = Date.now() + expiresInMinutes * 60 * 1000;
+  const otpHash = await bcrypt.hash(plainOtp, 8);
+
+  // Store in memory cache
+  memoryOtpStore.set(clean, { otpHash, expiresAt });
+
+  if (!supabaseAdmin) return true;
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('cms_content')
+      .upsert({
+        id: `otp_${clean}`,
+        data: { otpHash, expiresAt, email: clean },
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.warn('[DB] Warning saving OTP to database, memory fallback active:', error.message);
+    }
+    return true;
+  } catch (err) {
+    console.warn('[DB] OTP database save failed, memory fallback active:', err);
+    return true;
+  }
+}
+
+/**
+ * Verify an OTP code against database or memory store.
+ */
+export async function verifyPasswordResetOtp(
+  email: string,
+  plainOtp: string
+): Promise<{ valid: boolean; error?: string }> {
+  const clean = email.trim().toLowerCase();
+  let storedRecord: { otpHash: string; expiresAt: number } | null = null;
+
+  // 1. Try fetching from Supabase
+  if (supabaseAdmin) {
+    try {
+      const { data } = await supabaseAdmin
+        .from('cms_content')
+        .select('data')
+        .eq('id', `otp_${clean}`)
+        .single();
+
+      if (data?.data?.otpHash && data?.data?.expiresAt) {
+        storedRecord = {
+          otpHash: data.data.otpHash,
+          expiresAt: Number(data.data.expiresAt),
+        };
+      }
+    } catch {}
+  }
+
+  // 2. Fall back to memory store if database didn't have it
+  if (!storedRecord) {
+    storedRecord = memoryOtpStore.get(clean) || null;
+  }
+
+  if (!storedRecord) {
+    return { valid: false, error: 'No active OTP request found. Please request a new code.' };
+  }
+
+  if (Date.now() > storedRecord.expiresAt) {
+    memoryOtpStore.delete(clean);
+    return { valid: false, error: 'This code has expired. Please request a new code.' };
+  }
+
+  const isMatch = await bcrypt.compare(plainOtp.trim(), storedRecord.otpHash);
+  if (!isMatch) {
+    return { valid: false, error: 'Invalid verification code. Please check your email and try again.' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Clear an OTP after successful password reset.
+ */
+export async function clearPasswordResetOtp(email: string): Promise<void> {
+  const clean = email.trim().toLowerCase();
+  memoryOtpStore.delete(clean);
+
+  if (supabaseAdmin) {
+    try {
+      await supabaseAdmin.from('cms_content').delete().eq('id', `otp_${clean}`);
+    } catch {}
+  }
+}

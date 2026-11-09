@@ -156,12 +156,78 @@ export function useCMSAuth(requiredRole?: CMSUserRole) {
     []
   );
 
+  const sendResetOtp = useCallback(
+    async (
+      identifier: string
+    ): Promise<{ success: boolean; error?: string; message?: string; email?: string; maskedEmail?: string; unconfigured?: boolean }> => {
+      try {
+        const res = await fetch('/api/cms/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'send-otp', username: identifier }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return {
+            success: false,
+            error: data.error || 'Failed to send verification code',
+            unconfigured: data.unconfigured,
+          };
+        }
+
+        return {
+          success: true,
+          message: data.message,
+          email: data.email,
+          maskedEmail: data.maskedEmail,
+        };
+      } catch (err: any) {
+        return { success: false, error: err?.message || 'Network error while sending OTP' };
+      }
+    },
+    []
+  );
+
+  const verifyOtpReset = useCallback(
+    async (
+      emailOrUsername: string,
+      otp: string,
+      newPassword: string
+    ): Promise<{ success: boolean; error?: string; message?: string }> => {
+      try {
+        const res = await fetch('/api/cms/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'verify-otp-reset',
+            username: emailOrUsername,
+            otp,
+            newPassword,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return { success: false, error: data.error || 'Failed to verify OTP' };
+        }
+
+        return { success: true, message: data.message };
+      } catch (err: any) {
+        return { success: false, error: err?.message || 'Network error during password reset' };
+      }
+    },
+    []
+  );
+
   return {
     session,
     isAuthenticated: !!session,
     loading,
     login,
     resetPassword,
+    sendResetOtp,
+    verifyOtpReset,
     logout,
     refreshSession,
   };

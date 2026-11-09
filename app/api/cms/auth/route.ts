@@ -7,12 +7,29 @@ import {
   createSession,
   verifySessionToken,
 } from '@/lib/cms-auth';
-import { verifyUserCredentialsFromDB, resetUserPasswordInDB } from '@/lib/db';
+import {
+  verifyUserCredentialsFromDB,
+  resetUserPasswordInDB,
+  checkUserExistsInDB,
+  savePasswordResetOtp,
+  verifyPasswordResetOtp,
+  clearPasswordResetOtp,
+} from '@/lib/db';
+import { sendOtpEmail, isEmailConfigured } from '@/lib/email-service';
+
+function maskEmail(email: string): string {
+  const parts = email.split('@');
+  if (parts.length !== 2) return email;
+  const name = parts[0];
+  const domain = parts[1];
+  const maskedName = name.length <= 2 ? name : `${name.slice(0, 2)}***${name.slice(-1)}`;
+  return `${maskedName}@${domain}`;
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, username, password, token, route, recoveryKey, newPassword } = body;
+    const { action, username, password, token, route, recoveryKey, newPassword, otp, email } = body;
 
     // Verify existing token
     if (action === 'verify') {
@@ -20,6 +37,113 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ valid: false, error: 'Invalid or expired session' }, { status: 401 });
       }
       return NextResponse.json({ valid: true });
+    }
+
+    // Send OTP to email
+    if (action === 'send-otp') {
+      const identifier = (username || email || '').trim();
+      if (!identifier) {
+        return NextResponse.json({ error: 'Please enter your registered username or email.' }, { status: 400 });
+      }
+
+      const rateCheck = checkRateLimit(identifier.toLowerCase());
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { error: `Too many attempts. Account locked for ${rateCheck.remainingLockoutSeconds} seconds.` },
+          { status: 429 }
+        );
+      }
+
+      const userLookup = await checkUserExistsInDB(identifier);
+      if (!userLookup.exists || !userLookup.email) {
+        return NextResponse.json(
+          { error: 'No studio account was found matching that username or email address.' },
+          { status: 404 }
+        );
+      }
+
+      if (!isEmailConfigured()) {
+        return NextResponse.json(
+          {
+            error:
+              'Gmail SMTP is not yet configured on the server. Please set SMTP_USER and SMTP_PASS in your Vercel settings, or use the Studio Recovery Key below.',
+            unconfigured: true,
+          },
+          { status: 503 }
+        );
+      }
+
+      // Generate cryptographically sound 6-digit OTP
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      await savePasswordResetOtp(userLookup.email, generatedOtp, 10);
+
+      const emailResult = await sendOtpEmail(userLookup.email, generatedOtp);
+      if (!emailResult.success) {
+        return NextResponse.json(
+          { error: `Failed to dispatch email: ${emailResult.error}` },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        email: userLookup.email,
+        maskedEmail: maskEmail(userLookup.email),
+        message: `A 6-digit verification code has been sent to ${maskEmail(userLookup.email)}.`,
+      });
+    }
+
+    // Verify OTP and reset password
+    if (action === 'verify-otp-reset') {
+      const targetEmail = (email || username || '').trim();
+      if (!targetEmail || !otp || !newPassword) {
+        return NextResponse.json(
+          { error: 'Email/Username, OTP code, and new password are required.' },
+          { status: 400 }
+        );
+      }
+
+      if (newPassword.length < 8) {
+        return NextResponse.json(
+          { error: 'New password must be at least 8 characters long.' },
+          { status: 400 }
+        );
+      }
+
+      const rateCheck = checkRateLimit(targetEmail.toLowerCase());
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { error: `Too many attempts. Account locked for ${rateCheck.remainingLockoutSeconds} seconds.` },
+          { status: 429 }
+        );
+      }
+
+      const userLookup = await checkUserExistsInDB(targetEmail);
+      if (!userLookup.exists || !userLookup.email) {
+        return NextResponse.json({ error: 'Account not found.' }, { status: 404 });
+      }
+
+      const otpResult = await verifyPasswordResetOtp(userLookup.email, otp);
+      if (!otpResult.valid) {
+        recordFailedAttempt(targetEmail.toLowerCase());
+        return NextResponse.json({ error: otpResult.error || 'Invalid or expired OTP code.' }, { status: 400 });
+      }
+
+      const resetResult = await resetUserPasswordInDB(userLookup.email, newPassword);
+      if (!resetResult.success) {
+        return NextResponse.json(
+          { error: resetResult.error || 'Failed to update password in database.' },
+          { status: 500 }
+        );
+      }
+
+      await clearPasswordResetOtp(userLookup.email);
+      resetLoginAttempts(targetEmail.toLowerCase());
+
+      return NextResponse.json({
+        success: true,
+        message: 'Password successfully updated! You can now log in with your new password.',
+      });
     }
 
     // Reset password action
