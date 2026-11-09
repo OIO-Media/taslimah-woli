@@ -28,7 +28,7 @@ export const REGISTERED_USERS: Record<string, CMSUserAccount> = {
   developer: {
     id: 'user-ohayo',
     username: 'Ohayo',
-    email: 'dev@ohayo.internal',
+    email: 'israeloludele23@gmail.com',
     role: 'developer',
     name: 'Ohayo (Developer Maintenance)',
   },

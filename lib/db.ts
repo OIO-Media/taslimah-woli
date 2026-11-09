@@ -449,7 +449,7 @@ export async function checkUserExistsInDB(
   // Fallback check against REGISTERED_USERS
   const fallbackUsers = [
     { email: 'taslimah@taslimahwoli.com', username: 'taslimah' },
-    { email: 'dev@ohayo.internal', username: 'ohayo' },
+    { email: 'israeloludele23@gmail.com', username: 'ohayo' },
   ];
 
   const matched = fallbackUsers.find(
